@@ -5,6 +5,8 @@ set "LIB_SOURCE=%~f0"
 set "LIB_HOME=%LOCALAPPDATA%\StudentQuestionLibrary"
 if not exist "%LIB_HOME%" mkdir "%LIB_HOME%"
 set "LIB_ENGINE=%LIB_HOME%\search_engine.ps1"
+findstr /l /x /c:"REM#PS## END LIBRARY ENGINE" "%~f0" >nul
+if errorlevel 1 (echo ERROR: The batch file is incomplete. Upload the FULL downloaded file. & pause & exit /b 1)
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p=$env:LIB_SOURCE; $out=$env:LIB_ENGINE; $lines=Get-Content -LiteralPath $p; $code=@($lines | Where-Object { $_.StartsWith('REM#PS#') } | ForEach-Object { $_.Substring(7) }); [IO.File]::WriteAllLines($out,[string[]]$code,[Text.UTF8Encoding]::new($false))"
 if errorlevel 1 (echo Unable to initialize search engine. & pause & exit /b 1)
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p=$env:LIB_ENGINE; $tokens=$null; $errors=$null; [void][Management.Automation.Language.Parser]::ParseFile($p,[ref]$tokens,[ref]$errors); if($errors.Count -gt 0) { $errors | ForEach-Object { Write-Host ('Script error on line ' + $_.Extent.StartLineNumber + ': ' + $_.Message) }; exit 1 }"
@@ -92,5 +94,3 @@ REM#PS#    return $score
 REM#PS#}
 REM#PS#function Search-Entries([string]$query, [object[]]$entries) {
 REM#PS#    $found = @()
-REM#PS#    foreach ($entry in $entries) {
-REM#PS#        $rank = Score-Entry $query $entry.Question $entry.Path
