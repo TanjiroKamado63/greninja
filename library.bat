@@ -1,96 +1,128 @@
-@echo off
-setlocal EnableExtensions DisableDelayedExpansion
-title Student Question Library
-set "LIB_FILE=%~f0"
-set "LIB_HOME=%LOCALAPPDATA%\StudentQuestionLibrary"
-if not exist "%LIB_HOME%" mkdir "%LIB_HOME%"
-set "LIB_ENGINE=%LIB_HOME%\search_engine.ps1"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $lines=[IO.File]::ReadAllLines($env:LIB_FILE); $start=[Array]::IndexOf($lines,'# BEGIN_LIBRARY_ENGINE'); $end=[Array]::IndexOf($lines,'# END_LIBRARY_ENGINE'); if($start -lt 0 -or $end -le $start+1){throw 'Engine markers missing or empty'}; $code=$lines[($start+1)..($end-1)]; [IO.File]::WriteAllLines($env:LIB_ENGINE,[string[]]$code,(New-Object Text.UTF8Encoding($false))); $tokens=$null; $errors=$null; [Management.Automation.Language.Parser]::ParseFile($env:LIB_ENGINE,[ref]$tokens,[ref]$errors) | Out-Null; if($errors.Count){$errors | ForEach-Object { Write-Host $_.Message }; exit 1}"
-if errorlevel 1 (
- echo Search engine extraction or syntax validation failed.
- pause
- exit /b 1
-)
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%LIB_ENGINE%"
-if errorlevel 1 pause
-exit /b
-# BEGIN_LIBRARY_ENGINE
-$ErrorActionPreference = 'Stop'
-$Host.UI.RawUI.WindowTitle = 'Student Question Library'
-$owner = 'TanjiroKamado63'
-$repo = 'greninja'
-$branch = 'main'
-$base = Join-Path $env:LOCALAPPDATA 'StudentQuestionLibrary'
-$pdfdir = Join-Path $base 'PDFs'
-New-Item -ItemType Directory -Force -Path $base,$pdfdir | Out-Null
-$indexPath = Join-Path $base 'pdf_index.json'
-$questionPath = Join-Path $base 'questions_index.txt'
-$script:entries = @()
-function Refresh-Index {
-  Write-Host 'Downloading PDF list...'
-  $uri = 'https://api.github.com/repos/' + $owner + '/' + $repo + '/git/trees/' + $branch + '?recursive=1'
-  $tree = Invoke-RestMethod -Uri $uri -Headers @{ 'User-Agent'='StudentQuestionLibrary' } -TimeoutSec 30
-  if ($tree.truncated) { throw 'Repository tree is too large to list completely.' }
-  $pdfs = @($tree.tree | Where-Object { $_.type -eq 'blob' -and $_.path -match '\.pdf$' } | ForEach-Object { $_.path })
-  if ($pdfs.Count -eq 0) { Write-Host 'No PDF files found in the repository.' }
-  $pdfs | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $indexPath -Encoding UTF8
-  $qurl = 'https://raw.githubusercontent.com/' + $owner + '/' + $repo + '/' + $branch + '/questions_index.txt'
-  try { Invoke-WebRequest -Uri $qurl -OutFile $questionPath -UseBasicParsing -TimeoutSec 15 } catch { if (Test-Path $questionPath) { Remove-Item $questionPath -Force } }
-  Load-Index
-  Write-Host ('Loaded {0} PDFs and {1} question mappings.' -f $script:pdfs.Count, $script:questions.Count)
-}
-function Load-Index {
-  $script:pdfs = @()
-  $script:questions = @()
-  if (Test-Path $indexPath) {
-    $raw = Get-Content -LiteralPath $indexPath -Raw -Encoding UTF8
-    if ($raw.Trim()) { $script:pdfs = @(ConvertFrom-Json -InputObject $raw) }
-  }
-  if (Test-Path $questionPath) {
-    foreach ($line in @(Get-Content -LiteralPath $questionPath -Encoding UTF8)) {
-      $parts = $line -split '\|',2
-      if ($parts.Count -eq 2 -and $parts[0].Trim() -and $parts[1].Trim()) {
-        $script:questions += [pscustomobject]@{ Title=$parts[0].Trim(); Path=$parts[1].Trim() }
-      }
+    Write-Host 'Fetching PDF list...'
+    try {
+        $uri = "https://api.github.com/repos/$owner/$repo/git/trees/$branch`?recursive=1"
+        $tree = Invoke-RestMethod -Uri $uri -Headers @{ 'User-Agent'='StudentQuestionLibrary' } -TimeoutSec 35
+        $paths = @($tree.tree | Where-Object { $_.type -eq 'blob' -and $_.path -match '\.pdf$' } | ForEach-Object { $_.path })
+        $catalog = @()
+        foreach ($path in $paths) {
+            $name = [IO.Path]::GetFileNameWithoutExtension($path) -replace '[_-]', ' '
+            $catalog += [pscustomobject]@{ question = $name; path = $path }
+        }
+        $questionIndexUrl = "https://raw.githubusercontent.com/$owner/$repo/$branch/questions_index.txt"
+        try {
+            $lines = (Invoke-WebRequest -UseBasicParsing -Uri $questionIndexUrl -TimeoutSec 15).Content -split "`r?`n"
+            foreach ($line in $lines) {
+                $parts = $line -split '\|', 2
+                if ($parts.Count -eq 2 -and $paths -contains $parts[1].Trim()) {
+                    $catalog += [pscustomobject]@{ question = $parts[0].Trim(); path = $parts[1].Trim() }
+                }
+            }
+        } catch { }
+        $catalog | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $indexFile -Encoding UTF8
+        $script:entries = @($catalog)
+        Write-Host ("Loaded {0} searchable entries." -f $entries.Count)
+        return $true
+    } catch {
+        Write-Host ("Could not refresh: {0}" -f $_.Exception.Message)
+        return $false
     }
-  }
-  $script:entries = @()
-  foreach ($p in $script:pdfs) {
-    $title = [IO.Path]::GetFileNameWithoutExtension([string]$p) -replace '[_-]',' '
-    $script:entries += [pscustomobject]@{Title=$title;Path=[string]$p}
-  }
-  foreach ($q in $script:questions) {
-    if ($script:pdfs -contains $q.Path) { $script:entries += $q }
-  }
 }
 function Rank-Entries([string]$query) {
-  $q = $query.Trim().ToLowerInvariant()
-  if (-not $q) { return @() }
-  $words = @($q -split '[^a-z0-9]+' | Where-Object { $_.Length -gt 1 -and $_ -notin @('the','and','for','with','write','program','create','using','demonstrate','a','an','to','in','of') })
-  if ($words.Count -eq 0) { $words = @($q) }
-  $ranked = foreach ($item in $script:entries) {
-    $title = $item.Title.ToLowerInvariant()
-    $path = $item.Path.ToLowerInvariant()
-    $score = 0
-    if ($title -eq $q) { $score += 100 }
-    if ($title.Contains($q)) { $score += 45 }
-    if ($path.Contains($q)) { $score += 20 }
-    foreach ($w in $words) {
-      if ($title.Contains($w)) { $score += 12 }
-      elseif ($path.Contains($w)) { $score += 4 }
-      elseif ($w.Length -ge 4) {
-        $prefix = $w.Substring(0,[Math]::Min(4,$w.Length))
-        if ($title.Contains($prefix)) { $score += 2 }
-      }
+    $words = @($query.ToLowerInvariant() -split '\W+' | Where-Object { $_.Length -gt 1 })
+    if ($words.Count -eq 0) { return @() }
+    $ranked = foreach ($entry in $script:entries) {
+        $q = [string]$entry.question
+        $hay = ($q + ' ' + $entry.path).ToLowerInvariant() -replace '[_-]', ' '
+        $score = 0
+        foreach ($w in $words) {
+            if ($hay.Contains($w)) { $score += 10 }
+            elseif ($w.Length -ge 4 -and $hay.Contains($w.Substring(0, $w.Length - 1))) { $score += 4 }
+        }
+        if ($hay.Contains($query.ToLowerInvariant())) { $score += 30 }
+        if ($score -gt 0) { [pscustomobject]@{ item=$entry; score=$score } }
     }
-    if ($score -gt 0) { [pscustomobject]@{Title=$item.Title;Path=$item.Path;Score=$score} }
-  }
-  return @($ranked | Sort-Object -Property @{Expression='Score';Descending=$true},@{Expression='Title';Descending=$false} | Group-Object Path | ForEach-Object { $_.Group[0] })
+    return @($ranked | Sort-Object -Property @{Expression='score';Descending=$true}, @{Expression={$_.item.question};Descending=$false})
 }
-function Open-Pdf([string]$path) {
-  $sha = [Security.Cryptography.SHA256]::Create()
-  try { $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($path))).Replace('-','').Substring(0,20) } finally { $sha.Dispose() }
-  $local = Join-Path $pdfdir ($hash + '.pdf')
-  if (-not (Test-Path $local) -or (Get-Item $local).Length -eq 0) {
-    $segments = @($path.Split('/') | ForEach-Object { [Uri]::EscapeDataString($_) })
-    $url = 'https://raw.githubusercontent.com/' + $owner + '/' + $repo + '/' + $branch + '/' + ($segments -join '/')
+function Open-Pdf($entry) {
+    $remote = [string]$entry.path
+    $encoded = (($remote -split '/') | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/'
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $bytes = [Text.Encoding]::UTF8.GetBytes($remote)
+    $hash = ([BitConverter]::ToString($sha.ComputeHash($bytes)) -replace '-', '').Substring(0,20)
+    $local = Join-Path $pdfDir ($hash + '.pdf')
+    if (-not (Test-Path -LiteralPath $local)) {
+        Write-Host 'Downloading PDF...'
+        try {
+            Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/$owner/$repo/$branch/$encoded" -OutFile $local -TimeoutSec 60
+        } catch {
+            Remove-Item -LiteralPath $local -ErrorAction SilentlyContinue
+            Write-Host ("Download failed: {0}" -f $_.Exception.Message)
+            return
+        }
+    }
+    Start-Process -FilePath $local
+}
+function Results-Menu([object[]]$matches) {
+    if ($matches.Count -eq 0) { Write-Host 'No matches found.'; [void][Console]::ReadKey($true); return }
+    $page = 0
+    while ($true) {
+        Clear-Host
+        Write-Host '========== SEARCH RESULTS =========='
+        $pages = [int][Math]::Ceiling($matches.Count / 10.0)
+        Write-Host ("Total: {0}  Page: {1} of {2}" -f $matches.Count,($page+1),$pages)
+        Write-Host ''
+        $start = $page * 10
+        $end = [Math]::Min($start+9,$matches.Count-1)
+        for ($i=$start; $i -le $end; $i++) { Write-Host ("[{0}] {1}" -f ($i+1),$matches[$i].item.question) }
+        Write-Host ''
+        $answer = Read-Host 'Number = Open PDF, N = Next, P = Previous, M = Menu'
+        if ($answer -match '^(?i:m)$') { return }
+        if ($answer -match '^(?i:n)$') { if ($page+1 -lt $pages) { $page++ }; continue }
+        if ($answer -match '^(?i:p)$') { if ($page -gt 0) { $page-- }; continue }
+        $number = 0
+        if ([int]::TryParse($answer,[ref]$number) -and $number -ge ($start+1) -and $number -le ($end+1)) {
+            Open-Pdf $matches[$number-1].item
+            Write-Host 'Press any key to return to results...'
+            [void][Console]::ReadKey($true)
+        }
+    }
+}
+function Live-Search {
+    $query = ''
+    while ($true) {
+        Clear-Host
+        Write-Host '========== SEARCH QUESTION =========='
+        Write-Host 'Type to see suggestions. Enter = results. Esc = menu.'
+        Write-Host ''
+        Write-Host ('Search: ' + $query)
+        Write-Host ''
+        $matches = @(Rank-Entries $query)
+        if ($query.Length -gt 0) {
+            Write-Host 'SUGGESTIONS'
+            $limit = [Math]::Min(6,$matches.Count)
+            for ($i=0; $i -lt $limit; $i++) { Write-Host ("  {0}. {1}" -f ($i+1),$matches[$i].item.question) }
+            if ($limit -eq 0) { Write-Host '  No suggestions yet.' }
+        }
+        $key = [Console]::ReadKey($true)
+        if ($key.Key -eq 'Escape') { return }
+        if ($key.Key -eq 'Enter') { if ($matches.Count -gt 0) { Results-Menu $matches }; return }
+        if ($key.Key -eq 'Backspace') { if ($query.Length -gt 0) { $query=$query.Substring(0,$query.Length-1) }; continue }
+        if (-not [char]::IsControl($key.KeyChar)) { $query += $key.KeyChar }
+    }
+}
+Load-Catalog
+if ($entries.Count -eq 0) { [void](Refresh-Catalog); Start-Sleep -Seconds 1 }
+while ($true) {
+    Clear-Host
+    Write-Host '========================================'
+    Write-Host '        STUDENT QUESTION LIBRARY'
+    Write-Host '========================================'
+    Write-Host ''
+    Write-Host '[1] Search with live suggestions'
+    Write-Host '[2] Browse all PDFs'
+    Write-Host '[3] Refresh question and PDF list'
+    Write-Host '[0] Exit'
+    Write-Host ''
+    $choice = Read-Host 'Choose'
+    switch ($choice) {
+        '1' { Live-Search }
