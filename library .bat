@@ -1,9 +1,7 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions DisableDelayedExpansion
 title STUDENT QUESTION LIBRARY
 color 0A
-
-rem Configuration is already included. No editing needed.
 set "OWNER=TanjiroKamado63"
 set "REPO=greninja"
 set "BRANCH=main"
@@ -12,84 +10,87 @@ set "INDEX=%WORK%\pdf_index.txt"
 set "RESULTS=%WORK%\results.txt"
 set "JSON=%WORK%\github_tree.json"
 set "PDFDIR=%WORK%\PDFs"
-set "PAGESIZE=10"
 if not exist "%WORK%" mkdir "%WORK%"
 if not exist "%PDFDIR%" mkdir "%PDFDIR%"
 if not exist "%INDEX%" call :refresh
-
-goto menu
-
 :menu
 cls
-echo ============================================================
-echo                   STUDENT QUESTION LIBRARY
-echo ============================================================
+echo ========================================================
+echo                STUDENT QUESTION LIBRARY
+echo ========================================================
 echo.
-echo     [1] Search question keywords
-echo     [2] Browse all PDF files
-echo     [3] Search subject or topic
-echo     [4] Refresh PDF list
-echo     [0] Exit
+echo    [1] Search questions by keywords
+echo    [2] Browse all PDF files
+echo    [3] Search by subject or topic
+echo    [4] Refresh PDF list
+echo    [0] Exit
 echo.
-echo ============================================================
+echo ========================================================
 set "choice="
 set /p "choice=Choose an option: "
 if "%choice%"=="1" goto search
 if "%choice%"=="2" goto browse
-if "%choice%"=="3" goto search
-if "%choice%"=="4" goto refreshmenu
+if "%choice%"=="3" goto subject
+if "%choice%"=="4" goto update
 if "%choice%"=="0" exit /b 0
 goto menu
-
-:refreshmenu
+:update
 call :refresh
 pause
 goto menu
-
 :refresh
 echo.
-echo Updating PDF list from GitHub...
-curl.exe -fLsS --retry 2 --connect-timeout 15 -H "User-Agent: StudentQuestionLibrary" "https://api.github.com/repos/%OWNER%/%REPO%/git/trees/%BRANCH%?recursive=1" -o "%JSON%"
+echo Loading PDF list...
+curl.exe -fLsS --retry 2 -H "User-Agent: StudentQuestionLibrary" "https://api.github.com/repos/%OWNER%/%REPO%/git/trees/%BRANCH%?recursive=1" -o "%JSON%"
 if errorlevel 1 (
- echo ERROR: Could not contact GitHub. Check your internet connection.
+ echo ERROR: Could not download the file list.
  exit /b 1
 )
-rem Batch SET variables are inherited by PowerShell as environment variables.
-powershell.exe -NoProfile -NonInteractive -Command "try { $j=Get-Content -LiteralPath $env:JSON -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop; if(-not $j.tree){throw 'No files returned by GitHub'}; $a=@($j.tree | Where-Object { $_.type -eq 'blob' -and $_.path -match '\.pdf$' } | ForEach-Object { $_.path }); [System.IO.File]::WriteAllLines($env:INDEX,[string[]]$a,[System.Text.Encoding]::UTF8); Write-Host ('Loaded {0} PDF files.' -f $a.Count); if($j.truncated){Write-Host 'WARNING: GitHub returned a partial file list.'} } catch { Write-Host ('ERROR: ' + $_.Exception.Message); exit 1 }"
+powershell.exe -NoProfile -Command "$ErrorActionPreference='Stop'; $j=Get-Content -LiteralPath $env:JSON -Raw | ConvertFrom-Json; if(-not $j.tree){throw 'No file tree in GitHub response'}; if($j.truncated){Write-Host 'Warning: file list may be incomplete'}; @($j.tree | Where-Object { $_.type -eq 'blob' -and $_.path -match '\.pdf$' } | ForEach-Object { $_.path }) | Set-Content -LiteralPath $env:INDEX -Encoding Default"
 if errorlevel 1 (
- echo Could not update the index.
+ echo ERROR: Cannot parse the file list.
  exit /b 1
 )
+for /f %%C in ('find /c /v "" ^< "%INDEX%"') do set "COUNT=%%C"
+echo Found %COUNT% PDF files.
 exit /b 0
-
 :search
 cls
-echo =================== SEARCH QUESTIONS ===================
-echo Type a few words from the question, e.g. factorial API
+echo ================= SEARCH QUESTIONS =================
+echo Type a few words, e.g. factorial API
 set "term="
 set /p "term=Search: "
 if not defined term goto menu
+call :filter
+if errorlevel 1 goto menu
+set "PAGE=1"
+goto showpage
+:subject
+cls
+echo ================= SEARCH SUBJECT =================
+set "term="
+set /p "term=Subject or topic: "
+if not defined term goto menu
+call :filter
+if errorlevel 1 goto menu
+set "PAGE=1"
+goto showpage
+:filter
 if not exist "%INDEX%" (
- echo No PDF list available. Refresh first.
+ echo No PDF list found. Refresh first.
  pause
- goto menu
+ exit /b 1
 )
-rem Match ALL typed words anywhere in PDF filenames and folders.
-powershell.exe -NoProfile -NonInteractive -Command "try { $words=@($env:term -split '\s+' | Where-Object { $_ }); $a=@(Get-Content -LiteralPath $env:INDEX -Encoding UTF8 | Where-Object { $s=($_ -replace '[_-]',' '); $ok=$true; foreach($w in $words){if($s.IndexOf($w,[StringComparison]::OrdinalIgnoreCase) -lt 0){$ok=$false;break}}; $ok }); [System.IO.File]::WriteAllLines($env:RESULTS,[string[]]$a,[System.Text.Encoding]::UTF8) } catch { Write-Host $_.Exception.Message; exit 1 }"
+powershell.exe -NoProfile -Command "$words=@($env:term -split '\s+' | Where-Object { $_ }); $paths=@(Get-Content -LiteralPath $env:INDEX); $matches=@($paths | Where-Object { $name=($_ -replace '[_-]',' '); $ok=$true; foreach($w in $words){if($name.IndexOf($w,[StringComparison]::OrdinalIgnoreCase) -lt 0){$ok=$false;break}}; $ok }); $matches | Set-Content -LiteralPath $env:RESULTS -Encoding Default"
 if errorlevel 1 (
  echo Search failed.
  pause
- goto menu
+ exit /b 1
 )
-set /a PAGE=0
-goto showpage
-
+exit /b 0
 :browse
 if not exist "%INDEX%" (
- echo No PDF list available. Refresh first.
+ echo No PDF list found. Refresh first.
  pause
  goto menu
 )
-copy /y "%INDEX%" "%RESULTS%" >nul
-set /a PAGE=0
-goto showpage
