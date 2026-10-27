@@ -7,6 +7,8 @@ if not exist "%LIB_HOME%" mkdir "%LIB_HOME%"
 set "LIB_ENGINE=%LIB_HOME%\search_engine.ps1"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p=$env:LIB_SOURCE; $out=$env:LIB_ENGINE; $lines=Get-Content -LiteralPath $p; $code=@($lines | Where-Object { $_.StartsWith('REM#PS#') } | ForEach-Object { $_.Substring(7) }); [IO.File]::WriteAllLines($out,[string[]]$code,[Text.UTF8Encoding]::new($false))"
 if errorlevel 1 (echo Unable to initialize search engine. & pause & exit /b 1)
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p=$env:LIB_ENGINE; $tokens=$null; $errors=$null; [void][Management.Automation.Language.Parser]::ParseFile($p,[ref]$tokens,[ref]$errors); if($errors.Count -gt 0) { $errors | ForEach-Object { Write-Host ('Script error on line ' + $_.Extent.StartLineNumber + ': ' + $_.Message) }; exit 1 }"
+if errorlevel 1 (echo Embedded search engine is incomplete. Replace the entire GitHub file. & pause & exit /b 1)
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%LIB_ENGINE%"
 if errorlevel 1 (echo. & echo Search engine stopped with an error. & pause)
 exit /b
@@ -89,8 +91,6 @@ REM#PS#    if ($hits -eq $words.Count) { $score += 100 }
 REM#PS#    return $score
 REM#PS#}
 REM#PS#function Search-Entries([string]$query, [object[]]$entries) {
-REM#PS#    $found = foreach ($e in $entries) {
-REM#PS#        $score = Score-Entry $query $e.Question $e.Path
-REM#PS#        if ($score -gt 0) { [pscustomobject]@{ Question=$e.Question; Path=$e.Path; Score=$score } }
-REM#PS#    }
-REM#PS#     $seen = @{}; $ordered = foreach ($hit in ($found | Sort-Object -Property @{Expression='Score';Descending=$true}, @{Expression='Question';Descending=$false})) { if (-not $seen.ContainsKey($hit.Path)) { $seen[$hit.Path] = $true; $hit } }; return @($ordered)
+REM#PS#    $found = @()
+REM#PS#    foreach ($entry in $entries) {
+REM#PS#        $rank = Score-Entry $query $entry.Question $entry.Path
