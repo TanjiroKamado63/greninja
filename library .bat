@@ -4,7 +4,7 @@ set "LIB_SOURCE=%~f0"
 set "LIB_HOME=%LOCALAPPDATA%\StudentQuestionLibrary"
 if not exist "%LIB_HOME%" mkdir "%LIB_HOME%"
 set "LIB_ENGINE=%LIB_HOME%\search_engine.ps1"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$lines = Get-Content -LiteralPath $env:LIB_SOURCE; $code = @($lines | Where-Object { $_.StartsWith('::PS ') } | ForEach-Object { $_.Substring(5) }); if ($code.Count -ne 155) { throw 'Embedded engine incomplete' }; [IO.File]::WriteAllLines($env:LIB_ENGINE, [string[]]$code, (New-Object Text.UTF8Encoding($false))); $tokens=$null; $errors=$null; [void][Management.Automation.Language.Parser]::ParseFile($env:LIB_ENGINE,[ref]$tokens,[ref]$errors); if ($errors.Count) { $errors | ForEach-Object { Write-Host $_.Message }; exit 1 }"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$lines = Get-Content -LiteralPath $env:LIB_SOURCE; $code = @($lines | Where-Object { $_.StartsWith('::PS ') } | ForEach-Object { $_.Substring(5) }); if ($code.Count -lt 100 -or $code[-1] -ne '# END SEARCH ENGINE') { throw ('Embedded engine incomplete: extracted ' + $code.Count + ' lines') }; [IO.File]::WriteAllLines($env:LIB_ENGINE, [string[]]$code, (New-Object Text.UTF8Encoding($false))); $tokens=$null; $errors=$null; [void][Management.Automation.Language.Parser]::ParseFile($env:LIB_ENGINE,[ref]$tokens,[ref]$errors); if ($errors.Count) { $errors | ForEach-Object { Write-Host $_.Message }; exit 1 }"
 if errorlevel 1 (
   echo Search engine extraction failed. Check that the entire batch file was uploaded.
   pause
