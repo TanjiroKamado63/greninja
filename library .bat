@@ -4,7 +4,7 @@ chcp 65001 >nul
 title STUDENT QUESTION LIBRARY
 color 0B
 set "OWNER=TanjiroKamado63"
-set "REPO=python-code-"
+set "REPO=greninja"
 set "BRANCH=main"
 set "ROOT=%~dp0"
 set "CACHE=%LOCALAPPDATA%\StudentQuestionLibrary"
