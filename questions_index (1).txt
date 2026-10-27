@@ -1,0 +1,117 @@
+# Student Question Library - .NET Practical Questions
+# Format: Question ID | Question | PDF filename
+Q001 | Write a C# program to create methods for addition, subtraction, multiplication, and division. Use delegates to invoke these methods with suitable parameters. | Q001_methods_addition_subtraction_multiplication_division_Use.pdf
+Q002 | Develop a simple college website containing information about courses, faculty, and contact details. Convert it into a PWA using a Web App Manifest and Service Worker. | Q002_college_website_containing_information_about_courses_fac.pdf
+Q003 | Write a C# program to demonstrate function overloading and constructor overloading using suitable classes and objects. | Q003_function_overloading_constructor_overloading_suitable_cl.pdf
+Q004 | Create a PWA that displays a custom offline page whenever the user loses internet connectivity. Use a Service Worker to cache the required resources. | Q004_PWA_displays_custom_offline_page_whenever_loses_internet.pdf
+Q005 | Create an interface containing a method to calculate area. Implement the interface in Circle and Rectangle classes and display their respective areas using C#. | Q005_interface_containing_method_calculate_area_Implement_int.pdf
+Q006 | Develop a PWA that caches HTML, CSS, JavaScript, and image files using a Service Worker so that the application can work without an internet connection. | Q006_PWA_caches_HTML_CSS_JavaScript_image_files_Service_Worke.pdf
+Q007 | Write a C# program to demonstrate a multicast delegate that invokes multiple methods. Also demonstrate an event with a suitable example. | Q007_multicast_delegate_invokes_multiple_methods_Also_event_s.pdf
+Q008 | Create a PWA to add, view, update, and delete student records. Store records locally so that students' details remain accessible offline. | Q008_PWA_add_view_update_delete_student_records_Store_records.pdf
+Q009 | Create a BankAccount class with AccountNumber and Balance properties. Implement validation to ensure that the balance cannot be negative. | Q009_BankAccount_class_AccountNumber_Balance_properties_Imple.pdf
+Q010 | Create an HTML page linked to a manifest.json file. Configure the application name, icons, start URL, theme color, background color, and display mode. | Q010_HTML_page_linked_manifest_json_file_Configure_name_icons.pdf
+Q011 | Develop an ASP.NET MVC application that accepts two numbers from the user and performs addition, subtraction, multiplication, and division. Display the results on the webpage. | Q011_MVC_accepts_two_numbers_from_performs_addition_subtracti.pdf
+Q012 | Develop a simple ASP.NET Core Web API that returns student details, such as Roll Number, Name, Course, and Marks, in JSON format. Test the endpoint using a browser or Postman. | Q012_Web_API_returns_student_details_such_as_Roll_Number_Name.pdf
+Q013 | Write a C# program to accept the number of rows from the user and display Floyd’s triangle using nested loops. | Q013_accept_number_rows_from_display_Floyd_s_triangle_nested.pdf
+Q014 | Develop an ASP.NET Core Web API to perform Create, Read, Update, and Delete operations on student records stored in a database using Entity Framework Core. | Q014_Web_API_perform_Read_Update_Delete_operations_on_student.pdf
+Q015 | Write a C# program to accept the names of ten cities from the user and display them in alphabetical order. | Q015_accept_names_ten_cities_from_display_them_alphabetical_o.pdf
+Q016 | Create an ASP.NET Core Web API endpoint that accepts a number and returns its factorial. Test the API using Postman with valid input values. | Q016_Web_API_endpoint_accepts_number_returns_its_factorial_Te.pdf
+Q017 | Create an ASP.NET Web Forms application using TextBox, RadioButton, DropDownList, CheckBox, Calendar, and Button controls. Display the submitted student details using a Label control. | Q017_Web_Forms_TextBox_RadioButton_DropDownList_CheckBox_Cale.pdf
+Q018 | Develop a PWA with a Web App Manifest and implement push notifications to notify users about updates or important announcements. | Q018_PWA_Web_App_Manifest_implement_push_notifications_notify.pdf
+Q019 | Develop a student registration form using RequiredFieldValidator, RangeValidator, CompareValidator, and RegularExpressionValidator to validate user input | Q019_student_registration_form_RequiredFieldValidator_RangeVa.pdf
+Q020 | Develop an e-commerce PWA that displays a list of products and allows users to add products to a shopping cart. Store the cart locally so it remains available in offline mode. | Q020_e_commerce_PWA_displays_list_products_allows_users_add_p.pdf
+Q021 | Develop an ASP.NET Core web application to authenticate users and restrict access to pages based on user roles, such as Admin and User. | Q021_web_authenticate_users_restrict_access_pages_based_on_ro.pdf
+Q022 | Develop a simple hotel website containing information about rooms, food, and contact details. Convert it into a PWA using a Web App Manifest and Service Worker. | Q022_hotel_website_containing_information_about_rooms_food_co.pdf
+Q023 | Develop a customer registration form using RequiredFieldValidator, RangeValidator, CompareValidator, and RegularExpressionValidator to validate user input. | Q023_customer_registration_form_RequiredFieldValidator_RangeV.pdf
+Q024 | Create an ASP.NET Core Web API endpoint that accepts a number and return summation of its digits.test api using postman with valid input values. | Q024_Web_API_endpoint_accepts_number_return_summation_its_dig.pdf
+Q025 | Create an ASP.NET Web Forms application that displays rotating advertisements using the AdRotator control and an advertisement XML file. | Q025_Web_Forms_displays_rotating_advertisements_AdRotator_con.pdf
+Q026 | Develop a simple company website containing information about product, services, about us, and contact details. Convert it into a PWA using a Web App Manifest and Service Worker. | Q026_company_website_containing_information_about_product_ser.pdf
+Q027 | Write a C# program to accept the names of ten employees from the user and display them in alphabetical order. | Q027_accept_names_ten_employees_from_display_them_alphabetica.pdf
+Q028 | Develop an e-commerce PWA that displays a list of products and allows users to add products to a shopping cart. Store the cart locally so it remains available in offline mode. | Q028_e_commerce_PWA_displays_list_products_allows_users_add_p.pdf
+Q029 | Develop an ASP.NET MVC application that accepts single number from the user and find its square and cube. Display the results on the webpage. | Q029_MVC_accepts_single_number_from_find_its_square_cube_Disp.pdf
+Q030 | Create an HTML page linked to a manifest.json file. Configure the application name, icons, start URL, theme color, background color, and display mode. | Q030_HTML_page_linked_manifest_json_file_Configure_name_icons.pdf
+Q031 | Write a C# program to demonstrate multi level inheritance using suitable classes and objects. | Q031_multi_level_inheritance_suitable_classes_objects.pdf
+Q032 | Develop a PWA that caches HTML, CSS, JavaScript, and image files using a Service worker so that the application can work without internet. | Q032_PWA_caches_HTML_CSS_JavaScript_image_files_Service_worke.pdf
+Q033 | MVC Application for Basic Arithmetic Operations | Q033_MVC_Basic_Arithmetic_Operations.pdf
+Q034 | Create an application to print Floyd’s triangle till n rows in C#. | Q034_print_Floyd_s_triangle_till_n_rows.pdf
+Q035 | Write C# code to arrange the name of cities in sorted order. Accept name of 10 cities from the user | Q035_code_arrange_name_cities_sorted_order_Accept_name_10_cit.pdf
+Q036 | Write a C# program to demonstrate function overloading in C# by creating multiple methods with the same name but different parameters. | Q036_function_overloading_by_creating_multiple_methods_same_n.pdf
+Q037 | Write a C# program to demonstrate the any two types of inheritance. | Q037_any_two_types_inheritance.pdf
+Q038 | Write an ASP.NET Core web application to demonstrate the creation and management of session and persistent cookies. | Q038_web_creation_management_session_persistent_cookies.pdf
+Q039 | Write a C# program to demonstrate Multiple Inheritance using Interfaces. | Q039_Multiple_Inheritance_Interfaces.pdf
+Q040 | Write a C# program to demonstrate constructor overloading by defining multiple constructors with different parameter lists in the same class. | Q040_constructor_overloading_by_defining_multiple_constructor.pdf
+Q041 | Write a C# program to demonstrate the use of interfaces by defining contracts that classes must implement. | Q041_use_interfaces_by_defining_contracts_classes_must_implem.pdf
+Q042 | Write a C# program to demonstrate exception handling using try-catch- finally blocks, custom exceptions, and multiple catch handlers. | Q042_exception_handling_try_catch_finally_blocks_custom_excep.pdf
+Q043 | Write an ASP.NET Web Forms program to design a Student Registration Form using Label, TextBox, RadioButton, DropDownList, CheckBox, Calendar, and Button controls. | Q043_Web_Forms_design_Student_Registration_Form_Label_TextBox.pdf
+Q044 | Write a C# program to demonstrate Single Inheritance using a base class and a derived class. | Q044_Single_Inheritance_base_class_derived_class.pdf
+Q045 | Write an ASP.NET Core web application to demonstrate the use of Session Cookies and Persistent Cookies. | Q045_web_use_Session_Cookies_Persistent_Cookies.pdf
+Q046 | Write a C# program to create arithmetic methods Add(), Multiply(), Subtract(), and Divide(), and invoke them using delegates. | Q046_arithmetic_methods_Add_Multiply_Subtract_Divide_invoke_t.pdf
+Q047 | Write a C# program to demonstrate Single Inheritance using a base class and a derived class. | Q047_Single_Inheritance_base_class_derived_class.pdf
+Q048 | Write an ASP.NET Web Forms program to create a Registration Form using RequiredFieldValidator, RangeValidator, RegularExpressionValidator, and CompareValidator controls. | Q048_Web_Forms_Registration_Form_RequiredFieldValidator_Range.pdf
+Q049 | Develop a College Information Portal website and convert it into a Progressive Web Application (PWA) by implementing a Service Worker and Web App Manifest. | Q049_College_Information_Portal_website_convert_it_into_Progr.pdf
+Q050 | Write an ASP.NET Web Forms program to demonstrate the use of the AdRotator control to display rotating advertisements from an XML file. | Q050_Web_Forms_use_AdRotator_control_display_rotating_adverti.pdf
+Q051 | Develop a Progressive Web Application (PWA) that displays a custom offline page when the user loses internet connectivity. | Q051_Progressive_Web_PWA_displays_custom_offline_page_when_lo.pdf
+Q052 | Develop a Progressive Web Application (PWA) that supports offline functionality using a Service Worker and the cache-first caching strategy. | Q052_Progressive_Web_PWA_supports_offline_functionality_Servi.pdf
+Q053 | Write an ASP.NET Core Web API that returns student data in JSON format. | Q053_Web_API_returns_student_data_JSON_format.pdf
+Q054 | Write a C# program to demonstrate Single Inheritance using a base class and a derived class. | Q054_Single_Inheritance_base_class_derived_class.pdf
+Q055 | Develop an ASP.NET Core Web API to retrieve and return student details in JSON format. | Q055_Web_API_retrieve_return_student_details_JSON_format.pdf
+Q056 | Write C# code to arrange the name of cities in sorted order. | Q056_code_arrange_name_cities_sorted_order.pdf
+Q057 | Write C# code to arrange the name of cities in sorted order. Accept name of 10 cities from the user. | Q057_code_arrange_name_cities_sorted_order_Accept_name_10_cit.pdf
+Q058 | C# Application for Basic Arithmetic Operations. | Q058_Basic_Arithmetic_Operations.pdf
+Q059 | Write a C# program to create arithmetic methods Add(), Multiply(), Subtract(), and Divide(), and invoke them using delegates. | Q059_arithmetic_methods_Add_Multiply_Subtract_Divide_invoke_t.pdf
+Q060 | Create an application to print Floyd’s triangle till n rows in C#. | Q060_print_Floyd_s_triangle_till_n_rows.pdf
+Q061 | Write a C# program to demonstrate the use of interfaces by defining contracts that classes must implement. | Q061_use_interfaces_by_defining_contracts_classes_must_implem.pdf
+Q062 | Write a C# program to demonstrate Single Inheritance using a base class and a derived class. | Q062_Single_Inheritance_base_class_derived_class.pdf
+Q063 | Write an ASP.NET Web Forms program to create a Registration Form using RequiredFieldValidator, RangeValidator, RegularExpressionValidator, and CompareValidator controls. | Q063_Web_Forms_Registration_Form_RequiredFieldValidator_Range.pdf
+Q064 | Write a C# program demonstrates multiple inheritance in C# using two interfaces, IPrint and IShow, implemented by a single class Demo. | Q064_demonstrates_multiple_inheritance_two_interfaces_IPrint.pdf
+Q065 | Write a C# program to print Floyd's triangle up to N rows, where N is input by the user. | Q065_print_Floyd_s_triangle_up_N_rows_where_N_is_input_by.pdf
+Q066 | Write a C# program to demonstrate the any two types of inheritance. | Q066_any_two_types_inheritance.pdf
+Q067 | Write a C# program to demonstrate function overloading in C# by creating multiple methods with the same name but different parameters. | Q067_function_overloading_by_creating_multiple_methods_same_n.pdf
+Q068 | Create an MVC application to perform basic Arithmetic Operations. | Q068_MVC_perform_basic_Arithmetic_Operations.pdf
+Q069 | Develop a PWA that works in offline mode using Service Worker. | Q069_PWA_works_offline_mode_Service_Worker.pdf
+Q070 | Write a C# program to demonstrate exception handling using try, catch, and finally blocks. Handle the exception that occurs when a number is divided by zero. | Q070_exception_handling_try_catch_finally_blocks_Handle_excep.pdf
+Q071 | Create a simple Web API that returns Student data in JSON format. | Q071_Web_API_returns_Student_data_JSON_format.pdf
+Q072 | Write a C# program to demonstrate delegates and events. | Q072_delegates_events.pdf
+Q073 | Create a PWA with a Web App Manifest file including: App name Icons Start URL Display mode Implement Push Notifications in a PWA. | Q073_PWA_Web_App_Manifest_file_including_App_name_Icons_Start.pdf
+Q074 | Write a C# program to create an interface IShape containing a method CalculateArea(). Implement the interface in Circle and Rectangle classes. | Q074_interface_IShape_containing_method_CalculateArea_Impleme.pdf
+Q075 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q075_website_College_Information_Portal_convert_it_into_Progr.pdf
+Q076 | Write a C# program to demonstrate function overloading. | Q076_function_overloading.pdf
+Q077 | Create a Student Record Management PWA. | Q077_Student_Record_Management_PWA.pdf
+Q078 | Write a C# program to demonstrate the different types of inheritance: Single, Multilevel, Hierarchical. | Q078_different_types_inheritance_Single_Multilevel_Hierarchic.pdf
+Q079 | Create a PWA that displays a custom offline page when the user is not connected to the internet. | Q079_PWA_displays_custom_offline_page_when_is_not_connected_i.pdf
+Q080 | Create a class BankAccount with AccountNumber and Balance. Implement property for Balance with validation (Balance cannot be negative). | Q080_class_BankAccount_AccountNumber_Balance_Implement_proper.pdf
+Q081 | Create an API endpoint to calculate Factorial of a Number and test it using Postman. | Q081_API_endpoint_calculate_Factorial_Number_test_it_Postman.pdf
+Q082 | Create methods add(). multiply(), substract() ,divide() with suitable parameters and call these methods using concept of C# delegate. | Q082_methods_add_multiply_substract_divide_suitable_parameter.pdf
+Q083 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q083_website_College_Information_Portal_convert_it_into_Progr.pdf
+Q084 | Create an ASP.NET Web Forms application using simple server controls. a. Design a Student Registration Form using the following ASP.NET controls: i. Label and TextBox to accept Student Name ii. RadioButton to select Gender (Male/Female) iii. DropDownList to select Course (BSc IT, BSc CS, BCA) iv. CheckBox for accepting Terms & Conditions v. Calendar control to select Date vi. Button control to submit the form vii. Label control to display the output | Q084_Web_Forms_server_controls_Design_Student_Registration_Fo.pdf
+Q085 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q085_website_College_Information_Portal_convert_it_into_Progr.pdf
+Q086 | Create a simple Registration Form in ASP.NET Web Forms to demonstrate the following Validation Controls: a. RequiredFieldValidator b. RangeValidator c. CompareValidator d. RegularExpressionValidator | Q086_Registration_Form_Web_Forms_following_Validation_Control.pdf
+Q087 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q087_website_College_Information_Portal_convert_it_into_Progr.pdf
+Q088 | Create an ASP.NET Core application to demonstrate Authentication and Authorization. | Q088_Authentication_Authorization.pdf
+Q089 | Create a PWA with a Web App Manifest file including: App name Icons Start URL Display mode Implement Push Notifications in a PWA. | Q089_PWA_Web_App_Manifest_file_including_App_name_Icons_Start.pdf
+Q090 | Create Web Form to demonstrate use of Adrotator Control. | Q090_Web_Form_use_Adrotator_Control.pdf
+Q091 | Develop an E-Commerce PWA with product listing and offline cart functionality. | Q091_E_Commerce_PWA_product_listing_offline_cart_functionalit.pdf
+Q092 | Create an ASP.NET Web Forms application using simple server controls. a. Design an Employee Registration Form using the following ASP.NET controls: i. Label and TextBox to accept Employee Name ii. RadioButton to select Gender (Male/Female) iii. DropDownList to select Department (IT, HR, Finance) iv. CheckBox to accept Terms & Conditions v. Calendar control to select Joining Date vi. Button control to submit the form vii. Label control to display the output | Q092_Web_Forms_server_controls_Design_Employee_Registration_F.pdf
+Q093 | Create a PWA with a Web App Manifest file including: App name Icons Start URL Display mode Implement Push Notifications in a PWA. | Q093_PWA_Web_App_Manifest_file_including_App_name_Icons_Start.pdf
+Q094 | Create a Registration form to demonstrate use of various Validation controls. | Q094_Registration_form_use_various_Validation_controls.pdf
+Q095 | Create a PWA that displays a custom offline page when the user is not connected to the internet. | Q095_PWA_displays_custom_offline_page_when_is_not_connected_i.pdf
+Q096 | a. Write a program to implement Function Overloading b. Write a program to implement Multilevel Inheritance | Q096_implement_Function_Overloading_b_implement_Multilevel_In.pdf
+Q097 | Develop a PWA that works in offline mode using Service Worker. | Q097_PWA_works_offline_mode_Service_Worker.pdf
+Q098 | a. Write a program to implement Constructor overloading. b. Write a program to implement Interfaces. | Q098_implement_Constructor_overloading_b_implement_Interfaces.pdf
+Q099 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q099_website_College_Information_Portal_convert_it_into_Progr.pdf
+Q100 | Write a program using Delegates and events . | Q100_Delegates_events.pdf
+Q101 | Create a PWA that displays a custom offline page when the user is not connected to the internet. | Q101_PWA_displays_custom_offline_page_when_is_not_connected_i.pdf
+Q102 | Write a program using multicast delegate. | Q102_multicast_delegate.pdf
+Q103 | Create a Student Record Management PWA. | Q103_Student_Record_Management_PWA.pdf
+Q104 | Create Web Form to demonstrate use of Adrotator Control. | Q104_Web_Form_use_Adrotator_Control.pdf
+Q105 | Create a simple Web API that returns Student data in JSON format. | Q105_Web_API_returns_Student_data_JSON_format.pdf
+Q106 | Authentication and Authorization in ASP.NET Core. | Q106_Authentication_Authorization.pdf
+Q107 | Develop an E-Commerce PWA with product listing and offline cart functionality. | Q107_E_Commerce_PWA_product_listing_offline_cart_functionalit.pdf
+Q108 | Create a Registration form to demonstrate use of various Validation controls. | Q108_Registration_form_use_various_Validation_controls.pdf
+Q109 | Create an API endpoint to calculate Factorial of a Number and test it using Postman. | Q109_API_endpoint_calculate_Factorial_Number_test_it_Postman.pdf
+Q110 | Create a web application to demonstrate the use of different types of Cookies. | Q110_web_use_different_types_Cookies.pdf
+Q111 | Create a simple Web API that returns Student data in JSON format. | Q111_Web_API_returns_Student_data_JSON_format.pdf
+Q112 | a. Create an application to print Floyd’s triangle till n rows in C#. b. Write C# code to arrange the name of cities in sorted order. Accept name of 10 cities from the user | Q112_print_Floyd_s_triangle_till_n_rows_b_code_arrange_name_c.pdf
+Q113 | Create a Student Record Management PWA. | Q113_Student_Record_Management_PWA.pdf
+Q114 | Create a Registration form to demonstrate use of various Validation controls. | Q114_Registration_form_use_various_Validation_controls.pdf
+Q115 | Create a simple website for a College Information Portal and convert it into a Progressive Web Application. | Q115_website_College_Information_Portal_convert_it_into_Progr.pdf
