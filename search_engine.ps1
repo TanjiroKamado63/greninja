@@ -1,96 +1,94 @@
+# Student Question Library - Windows PowerShell 5.1
+# Uses questions_index.txt (no INDEX.csv required)
 $ErrorActionPreference = 'Stop'
+
+# GitHub repository configuration.
 $owner = 'TanjiroKamado63'
 $repo = 'greninja'
 $branch = 'main'
-$homeDir = Join-Path $env:LOCALAPPDATA 'StudentQuestionLibrary'
-$pdfDir = Join-Path $homeDir 'PDFs'
-$indexFile = Join-Path $homeDir 'question_catalog.json'
-New-Item -ItemType Directory -Force -Path $pdfDir | Out-Null
-$entries = @()
-function Load-Catalog {
-    $script:entries = @()
-    if (Test-Path -LiteralPath $indexFile) {
-        try { $script:entries = @(Get-Content -LiteralPath $indexFile -Raw -Encoding UTF8 | ConvertFrom-Json) } catch { $script:entries = @() }
-    }
+
+$cache = Join-Path $env:LOCALAPPDATA 'StudentQuestionLibrary'
+$pdfDir = Join-Path $cache 'PDFs'
+New-Item -ItemType Directory -Path $pdfDir -Force | Out-Null
+
+function Get-RawUrl([string]$path) {
+    $parts = $path -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }
+    return "https://raw.githubusercontent.com/$owner/$repo/$branch/$($parts -join '/')"
 }
-function Refresh-Catalog {
-    Write-Host 'Fetching PDF list...'
-    try {
-        $uri = "https://api.github.com/repos/$owner/$repo/git/trees/$branch`?recursive=1"
-        $tree = Invoke-RestMethod -Uri $uri -Headers @{ 'User-Agent'='StudentQuestionLibrary' } -TimeoutSec 35
-        $paths = @($tree.tree | Where-Object { $_.type -eq 'blob' -and $_.path -match '\.pdf$' } | ForEach-Object { $_.path })
-        $catalog = @()
-        foreach ($path in $paths) {
-            $name = [IO.Path]::GetFileNameWithoutExtension($path) -replace '[_-]', ' '
-            $catalog += [pscustomobject]@{ question = $name; path = $path }
-        }
-        $questionIndexUrl = "https://raw.githubusercontent.com/$owner/$repo/$branch/questions_index.txt"
+function Download([string]$url, [string]$path) {
+    Invoke-WebRequest -Uri $url -OutFile $path -UseBasicParsing -TimeoutSec 45
+}
+function Load-Index {
+    $locations = @('questions_index.txt', 'DotNet_Separate_Question_PDFs/questions_index.txt')
+    foreach ($location in $locations) {
         try {
-            $lines = (Invoke-WebRequest -UseBasicParsing -Uri $questionIndexUrl -TimeoutSec 15).Content -split "`r?`n"
-            foreach ($line in $lines) {
-                $parts = $line -split '\|', 2
-                if ($parts.Count -eq 2) {
-                    $requested = $parts[1].Trim()
-                    $resolved = $null
-                    if ($paths -contains $requested) { $resolved = $requested }
-                    elseif ($requested -match '^Q[0-9]{3}$') {
-                        $prefix = $requested + '_'
-                        $candidates = @($paths | Where-Object { [IO.Path]::GetFileName($_).StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) })
-                        if ($candidates.Count -eq 1) { $resolved = $candidates[0] }
-                    }
-                    if ($resolved -and $parts[0].Trim()) {
-                        $catalog += [pscustomobject]@{ question = $parts[0].Trim(); path = $resolved }
-                    }
+            $temp = Join-Path $cache 'questions_index.txt'
+            Download (Get-RawUrl $location) $temp
+            $rows = New-Object 'System.Collections.Generic.List[object]'
+            foreach ($line in (Get-Content -LiteralPath $temp -Encoding UTF8)) {
+                if ($line -match '^\s*(Q\d+)\s*\|\s*(.*?)\s*\|\s*(\S+\.pdf)\s*$') {
+                    $rows.Add([pscustomobject]@{ ID=$matches[1]; Question=$matches[2]; File=$matches[3] })
                 }
             }
+            if ($rows.Count -gt 0) { return @($rows.ToArray()) }
         } catch { }
-        $catalog | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $indexFile -Encoding UTF8
-        $script:entries = @($catalog)
-        Write-Host ("Loaded {0} searchable entries." -f $entries.Count)
-        return $true
-    } catch {
-        Write-Host ("Could not refresh: {0}" -f $_.Exception.Message)
-        return $false
     }
+    throw 'Could not read questions_index.txt. Check the repository name, branch and file location.'
 }
-function Rank-Entries([string]$query) {
-    $words = @($query.ToLowerInvariant() -split '\W+' | Where-Object { $_.Length -gt 1 })
-    if ($words.Count -eq 0) { return @() }
-    $ranked = foreach ($entry in $script:entries) {
-        $q = [string]$entry.question
-        $hay = ($q + ' ' + $entry.path).ToLowerInvariant() -replace '[_-]', ' '
-        $score = 0
-        foreach ($w in $words) {
-            if ($hay.Contains($w)) { $score += 10 }
-            elseif ($w.Length -ge 4 -and $hay.Contains($w.Substring(0, $w.Length - 1))) { $score += 4 }
-        }
-        if ($hay.Contains($query.ToLowerInvariant())) { $score += 30 }
-        if ($score -gt 0) { [pscustomobject]@{ item=$entry; score=$score } }
-    }
-    return @($ranked | Sort-Object -Property @{Expression='score';Descending=$true}, @{Expression={$_.item.question};Descending=$false})
-}
-function Open-Pdf($entry) {
-    $remote = [string]$entry.path
-    $encoded = (($remote -split '/') | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/'
-    $sha = [Security.Cryptography.SHA256]::Create()
-    $bytes = [Text.Encoding]::UTF8.GetBytes($remote)
-    $hash = ([BitConverter]::ToString($sha.ComputeHash($bytes)) -replace '-', '').Substring(0,20)
-    $local = Join-Path $pdfDir ($hash + '.pdf')
-    if (-not (Test-Path -LiteralPath $local)) {
-        Write-Host 'Downloading PDF...'
+function Get-Pdf([string]$file) {
+    $target = Join-Path $pdfDir $file
+    if (Test-Path -LiteralPath $target) { return $target }
+    foreach ($path in @($file, "DotNet_Separate_Question_PDFs/$file")) {
         try {
-            Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/$owner/$repo/$branch/$encoded" -OutFile $local -TimeoutSec 60
+            Download (Get-RawUrl $path) $target
+            if ((Get-Item -LiteralPath $target).Length -gt 0) { return $target }
         } catch {
-            Remove-Item -LiteralPath $local -ErrorAction SilentlyContinue
-            Write-Host ("Download failed: {0}" -f $_.Exception.Message)
-            return
+            Remove-Item -LiteralPath $target -ErrorAction SilentlyContinue
         }
     }
-    Start-Process -FilePath $local
+    throw "PDF not found: $file. Upload the individual PDF files (not only the ZIP)."
 }
-function Results-Menu([object[]]$matches) {
-    if ($matches.Count -eq 0) { Write-Host 'No matches found.'; [void][Console]::ReadKey($true); return }
-    $page = 0
-    while ($true) {
-        Clear-Host
-        Write-Host '========== SEARCH RESULTS =========='
+
+if ($owner -eq 'YOUR_GITHUB_USERNAME' -or $repo -eq 'YOUR_REPOSITORY_NAME') {
+    Write-Host 'First edit $owner and $repo in this script.' -ForegroundColor Yellow
+    Read-Host 'Press Enter to exit' | Out-Null
+    exit 1
+}
+try { $items = @(Load-Index) }
+catch { Write-Host $_.Exception.Message -ForegroundColor Red; Read-Host 'Press Enter to exit' | Out-Null; exit 1 }
+
+while ($true) {
+    Clear-Host
+    Write-Host '=== STUDENT QUESTION LIBRARY ===' -ForegroundColor Cyan
+    Write-Host "Indexed questions: $($items.Count)"
+    Write-Host 'Search by Q001, question keyword, or type R to refresh. Type 0 to exit.'
+    $query = (Read-Host 'Search').Trim()
+    if ($query -eq '0') { break }
+    if ($query -eq 'R') {
+        try { $items = @(Load-Index); Write-Host 'Index refreshed.' -ForegroundColor Green }
+        catch { Write-Host $_.Exception.Message -ForegroundColor Red }
+        Read-Host 'Press Enter' | Out-Null
+        continue
+    }
+    if ([string]::IsNullOrWhiteSpace($query)) { continue }
+    $found = @($items | Where-Object { $_.ID -like "*$query*" -or $_.Question -like "*$query*" })
+    if ($found.Count -eq 0) {
+        Write-Host 'No matching questions.' -ForegroundColor Yellow
+        Read-Host 'Press Enter' | Out-Null
+        continue
+    }
+    $number = 1
+    foreach ($item in $found) {
+        Write-Host ("{0}. [{1}] {2}" -f $number, $item.ID, $item.Question)
+        $number++
+    }
+    $selection = Read-Host 'Enter result number to open PDF (0 to search again)'
+    $chosen = 0
+    if (-not [int]::TryParse($selection, [ref]$chosen) -or $chosen -lt 1 -or $chosen -gt $found.Count) { continue }
+    try {
+        $pdf = Get-Pdf $found[$chosen - 1].File
+        Start-Process -FilePath $pdf
+        Write-Host "Opened: $pdf" -ForegroundColor Green
+    } catch { Write-Host $_.Exception.Message -ForegroundColor Red }
+    Read-Host 'Press Enter to search again' | Out-Null
+}
