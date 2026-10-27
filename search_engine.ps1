@@ -1,3 +1,35 @@
+# Student Question Library - Windows PowerShell 5.1
+# Public GitHub PDF library; no administrator permissions required.
+$ErrorActionPreference = 'Stop'
+$owner = 'TanjiroKamado63'
+$repo = 'greninja'
+$branch = 'main'
+
+try {
+    $cache = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'StudentQuestionLibrary'
+    $pdfDir = Join-Path $cache 'PDFs'
+    New-Item -ItemType Directory -Path $pdfDir -Force -ErrorAction Stop | Out-Null
+} catch {
+    Write-Host "Cannot create library folder: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host 'Check whether this computer restricts writing to your user profile.'
+    Read-Host 'Press Enter to exit' | Out-Null
+    exit 1
+}
+
+function Get-RawUrl([string]$path) {
+    $encoded = ($path -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/'
+    return "https://raw.githubusercontent.com/$owner/$repo/$branch/$encoded"
+}
+function Download-File([string]$url, [string]$destination) {
+    # TLS 1.2 support on older Windows PowerShell 5.1 systems.
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing -TimeoutSec 45 -ErrorAction Stop
+}
+function Load-Index {
+    $errors = New-Object 'System.Collections.Generic.List[string]'
+    foreach ($location in @('questions_index.txt', 'DotNet_Separate_Question_PDFs/questions_index.txt')) {
+        $url = Get-RawUrl $location
+        $temp = Join-Path $cache 'questions_index.txt'
         try {
             Download-File $url $temp
             $rows = New-Object 'System.Collections.Generic.List[object]'
